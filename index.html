@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Carbon Footprint Logger UI</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="Visual CO2 emissions summary">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./style.css" />
+        <script src="./script.js"></script>
+    </head>
+    <body>
+        <div id="title-div">
+            <h1>Carbon Footprint Logger</h1>
+        </div>
+
+        <div id="description-div">
+            <p>A visual summary of the CO<sub>2</sub> emissions from your daily activities.</p>
+        </div>
+
+        <div id="task-div">
+            <p>Add the activities and their associated categories to get a visual summary of the CO<sub>2</sub> emissions.</p>
+        </div>
+
+        <div>
+            <button id="add-btn">Add</button>
+            <button id="remove-btn">Remove</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+
+        <div id="table-div">
+            <table class="table">
+                <tr>
+                    <th>Activity</th>
+                    <th>Category</th>
+                </tr>
+                <tr>
+                    <td>
+                        <select>
+                            <option>Please select an option</option>
+                            <option>Sitting/Sleeping</option>
+                            <option>Walking/Running</option>
+                            <option>Eating bread, meat and drink fluids</option>
+                            <option>Charging portable gadgets (e.g., smartphone, laptop, tablet)</option>
+                            <option>Bought clothing and cosmetic products</option>
+                            <option>Recycling</option>
+                            <option>Used geyser</option>
+                            <option>Drove a Tesla vehicle</option>
+                            <option>Took a taxi (regular, Uber, or Bolt)</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select>
+                            <option>None</option>
+                            <option>Transport</option>
+                            <option>Food & Drinks</option>
+                            <option>Energy Use</option>
+                            <option>Consumption & Products</option>
+                            <option>Waste</option>
+                            <option>Housing</option>
+                            <option>Other</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <div>
+            <button id="summarise-btn">Summarise</button>
+        </div>
+
+    </body>
+</html>
