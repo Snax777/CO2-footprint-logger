@@ -1,6 +1,6 @@
 function addActivityData() {
   const activityArray = [
-    "Please select an option",
+    "Select an activity",
     "Sitting/Sleeping",
     "Walking/Running",
     "Eating solid foods and drinking fluids",
@@ -33,7 +33,7 @@ function addActivityData() {
 
 function addCategoryData() {
   const categoryArray = [
-    "None",
+    "Select a category",
     "Transport",
     "Food & Drinks",
     "Energy Use",
