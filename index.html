@@ -14,7 +14,7 @@
         </div>
 
         <div id="description-div">
-            <p>A visual summary of the CO<sub>2</sub> emissions from your daily activities.</p>
+            <p>A visual summary of the CO<sub>2</sub> emissions (measured in kg CO<sub>2</sub>) from your daily activities.</p>
         </div>
 
         <div id="task-div">
@@ -22,30 +22,30 @@
         </div>
 
         <div>
-            <button id="add-btn">Add</button>
-            <button id="remove-btn">Remove</button>
-            <button id="reset-btn">Reset</button>
+            <button id="add-btn" onclick="addTableRow()">Add</button>
+            <button id="remove-btn" onclick="removeTableRow()">Remove</button>
+            <button id="reset-btn" onclick="resetTable()">Reset</button>
         </div>
 
         <div id="table-div">
-            <table class="table">
+            <table id="table">
                 <tr>
                     <th>Activity</th>
                     <th>Category</th>
                 </tr>
-                <tr>
+                <tr id="data">
                     <td>
                         <select>
                             <option id="default">Please select an option</option>
                             <option id="option-1">Sitting/Sleeping</option>
                             <option id="option-2">Walking/Running</option>
-                            <option id="option-3">Eating bread, meat and drink fluids</option>
+                            <option id="option-3">Eating solid foods and drinking fluids</option>
                             <option id="option-4">Charging portable gadgets (e.g., smartphone, laptop, tablet)</option>
-                            <option id="option-5">Bought clothing and cosmetic products</option>
+                            <option id="option-5">Buying clothing and cosmetic products</option>
                             <option id="option-6">Recycling</option>
-                            <option id="option-7">Used geyser</option>
-                            <option id="option-8">Drove a Tesla vehicle</option>
-                            <option id="option">Took a taxi (regular, Uber, or Bolt)</option>
+                            <option id="option-7">Using geyser</option>
+                            <option id="option-8">Driving a vehicle</option>
+                            <option id="option-9">Taking a taxi (regular, Uber, or Bolt)</option>
                         </select>
                     </td>
                     <td>
