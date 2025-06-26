@@ -75,11 +75,50 @@ function removeTableRow() {
 }
 
 function resetTable() {
-  document.getElementById("table").appendChild(addCategoryData());
+  addTableRow();
 
   const tableLength = document.querySelectorAll("tr").length;
 
   for (let i = 1; i < tableLength-1; i++) {
     document.querySelectorAll("tr")[1].remove();
   }
+}
+
+function getTotalCO2Emissions() {
+   const categoriesCollections = document.querySelectorAll("option");
+   const tableLength = categoriesCollections.length;
+   const CO2Total = 0;
+   const categoryMultiplier = {
+    "Transport": 2,
+    "Food & Drinks": 0.25,
+    "Energy Use": 1.5,
+    "Consumption & Products": 0.01,
+    "Waste": 0.5,
+    "Housing": 0.75,
+    "Other": 1,
+   };
+   const globalAvgCO2Emissions = 25.9;
+
+   for (let i = 0; i <= tableLength + 1; i++) {
+    var category = categoriesCollections[i].value;
+
+    if (!(category in categoryMultiplier)) {
+      window.alert(
+        `Please select a valid category or activity. \n
+        \n
+        E.g., 'Transport', 'Waste', or 'Other'.`
+      );
+    }
+    
+    CO2Total = CO2Total + (globalAvgCO2Emissions * categoryMultiplier[category]);
+  }
+
+  const HTMLDivTag = document.createElement("div");
+  const CO2TotalString = `The total amount CO\<sub\>2\</sub\> emissions caused by the activities are ${CO2Total}`;
+  const HTMLH3Tag = document.createElement("h3");
+  HTMLH3Tag.textContent = CO2TotalString;
+
+  HTMLDivTag.setAttribute("id", "co2-value");
+  document.getElementById("co2-value").appendChild(HTMLH3Tag);
+  document.getElementById("body-id").appendChild(HTMLDivTag);
 }
