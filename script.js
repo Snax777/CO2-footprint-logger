@@ -47,11 +47,17 @@ function addCategoryData() {
   const newTableData = document.createElement("td");
   const newSelectCategory = document.createElement("select");
 
+  newSelectCategory.setAttribute("class", "category-values");
+
   for (let i = 0; i < categoryArray.length; i++) {
     const categoryOption = document.createElement("option");
-
     categoryOption.text = categoryArray[i];
     categoryOption.value = categoryArray[i];
+
+    if (categoryArray[i] === categoryArray[0]) {
+      categoryOption.selected = true;
+      categoryOption.disabled = true;
+    }
 
     newSelectCategory.appendChild(categoryOption);
   }
@@ -75,50 +81,72 @@ function removeTableRow() {
 }
 
 function resetTable() {
-  addTableRow();
-
   const tableLength = document.querySelectorAll("tr").length;
 
-  for (let i = 1; i < tableLength-1; i++) {
+  for (let i = 1; i < tableLength; i++) {
     document.querySelectorAll("tr")[1].remove();
+  }
+
+  addTableRow();
+
+  if (document.getElementById("co2-result")) {
+    document.getElementById("co2-result").remove();
   }
 }
 
-function getTotalCO2Emissions() {
-   const categoriesCollections = document.querySelectorAll("option");
-   const tableLength = categoriesCollections.length;
-   const CO2Total = 0;
-   const categoryMultiplier = {
-    "Transport": 2,
+function updateCO2Emissions(nodeList, length) {
+  let newCO2Str = calculateCO2Emissions(nodeList, length);
+  let divElement = document.getElementById("co2-result");
+
+  if (divElement) {
+    divElement.remove();
+  }
+
+  let element = document.createElement("p");
+  element.id = "co2-value";
+  let div = document.createElement("div");
+  div.id = "co2-result";
+  element.innerHTML =
+    "The total CO<sub>2</sub> emissions is " +
+    newCO2Str +
+    " kg CO<sub>2</sub>.";
+
+  div.appendChild(element);
+  document.getElementById("body-id").appendChild(div);
+}
+
+function calculateCO2Emissions(nodeList, length) {
+  let CO2Total = 0;
+
+  const categoryMultiplier = {
+    Transport: 2,
     "Food & Drinks": 0.25,
     "Energy Use": 1.5,
     "Consumption & Products": 0.01,
-    "Waste": 0.5,
-    "Housing": 0.75,
-    "Other": 1,
-   };
-   const globalAvgCO2Emissions = 25.9;
+    Waste: 0.5,
+    Housing: 0.75,
+    Other: 1,
+  };
 
-   for (let i = 0; i <= tableLength + 1; i++) {
-    var category = categoriesCollections[i].value;
+  const globalAvgCO2Emissions = 25.9;
+
+  for (let i = 0; i < length; i++) {
+    let category = nodeList[i].options[nodeList[i].selectedIndex].text.trim();
 
     if (!(category in categoryMultiplier)) {
-      window.alert(
-        `Please select a valid category or activity. \n
-        \n
-        E.g., 'Transport', 'Waste', or 'Other'.`
-      );
+      window.alert("Please select a category.");
+      return;
     }
-    
-    CO2Total = CO2Total + (globalAvgCO2Emissions * categoryMultiplier[category]);
+
+    CO2Total += categoryMultiplier[category] * globalAvgCO2Emissions;
   }
 
-  const HTMLDivTag = document.createElement("div");
-  const CO2TotalString = `The total amount CO\<sub\>2\</sub\> emissions caused by the activities are ${CO2Total}`;
-  const HTMLH3Tag = document.createElement("h3");
-  HTMLH3Tag.textContent = CO2TotalString;
+  return CO2Total.toFixed(2);
+}
 
-  HTMLDivTag.setAttribute("id", "co2-value");
-  document.getElementById("co2-value").appendChild(HTMLH3Tag);
-  document.getElementById("body-id").appendChild(HTMLDivTag);
+function getTotalCO2Emissions() {
+  const htmlOptionsNodeList = document.querySelectorAll(".category-values");
+  const nodeListLength = htmlOptionsNodeList.length;
+
+  updateCO2Emissions(htmlOptionsNodeList, nodeListLength);
 }

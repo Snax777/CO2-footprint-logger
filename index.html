@@ -35,29 +35,33 @@
                 </tr>
                 <tr id="data">
                     <td>
-                        <select>
-                            <option id="default">Select an activity</option>
-                            <option id="option-1">Sitting/Sleeping</option>
-                            <option id="option-2">Walking/Running</option>
-                            <option id="option-3">Eating solid foods and drinking fluids</option>
-                            <option id="option-4">Charging portable gadgets (e.g., smartphone, laptop, tablet)</option>
-                            <option id="option-5">Buying clothing and cosmetic products</option>
-                            <option id="option-6">Recycling</option>
+                        <select id="activity-values">
+                            <option value="Select an activity" disabled selected>Select an activity</option>
+                            <option value="Sitting/Sleeping">Sitting/Sleeping</option>
+                            <option value="Walking/Running">Walking/Running</option>
+                            <option value="Eating solid foods and drinking fluids">
+                                Eating solid foods and drinking fluids
+                            </option>
+                            <option value="Charging portable gadgets (e.g., smartphone, laptop, tablet)">
+                                Charging portable gadgets (e.g., smartphone, laptop, tablet)
+                            </option>
+                            <option value="Buying clothing and cosmetic products">Buying clothing and cosmetic products</option>
+                            <option value="Recycling">Recycling</option>
                             <option id="option-7">Using geyser</option>
                             <option id="option-8">Driving a vehicle</option>
                             <option id="option-9">Taking a taxi (regular, Uber, or Bolt)</option>
                         </select>
                     </td>
                     <td>
-                        <select>
-                            <option id="none-opt">Select a category</option>
-                            <option id="transport-opt">Transport</option>
-                            <option id="food-opt">Food & Drinks</option>
-                            <option id="energy-opt">Energy Use</option>
-                            <option id="consume-opt">Consumption & Products</option>
-                            <option id="waste-opt">Waste</option>
-                            <option id="housing-opt">Housing</option>
-                            <option id="other-opt">Other</option>
+                        <select class="category-values">
+                            <option value="Select a category" class="category-value" disabled selected>Select a category</option>
+                            <option value="Transport" class="category-value">Transport</option>
+                            <option value="Food & Drinks" class="category-value">Food & Drinks</option>
+                            <option value="Energy Use" class="category-value">Energy Use</option>
+                            <option value="Consumption & Products" id="category-value">Consumption & Products</option>
+                            <option value="Waste" class="category-value">Waste</option>
+                            <option value="Housing" class="category-value">Housing</option>
+                            <option value="Other" class="category-value">Other</option>
                         </select>
                     </td>
                 </tr>
