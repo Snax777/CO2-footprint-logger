@@ -98,21 +98,28 @@ function updateCO2Emissions(nodeList, length) {
   let newCO2Str = calculateCO2Emissions(nodeList, length);
   let divElement = document.getElementById("co2-result");
 
-  if (divElement) {
-    divElement.remove();
+  if (newCO2Str === undefined) {
+    if (!divElement) {
+    } else {
+      divElement.remove();
+    }
+  } else {
+    if (divElement) {
+      divElement.remove();
+    }
+
+    let element = document.createElement("p");
+    element.id = "co2-value";
+    let div = document.createElement("div");
+    div.id = "co2-result";
+    element.innerHTML =
+      "The total CO<sub>2</sub> emissions is " +
+      newCO2Str +
+      " kg CO<sub>2</sub>.";
+
+    div.appendChild(element);
+    document.getElementById("body-id").appendChild(div);
   }
-
-  let element = document.createElement("p");
-  element.id = "co2-value";
-  let div = document.createElement("div");
-  div.id = "co2-result";
-  element.innerHTML =
-    "The total CO<sub>2</sub> emissions is " +
-    newCO2Str +
-    " kg CO<sub>2</sub>.";
-
-  div.appendChild(element);
-  document.getElementById("body-id").appendChild(div);
 }
 
 function calculateCO2Emissions(nodeList, length) {
