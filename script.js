@@ -15,12 +15,18 @@ function addActivityData() {
   const newTableRow = document.createElement("tr");
   const newTableData = document.createElement("td");
   const newSelectActivity = document.createElement("select");
+  newSelectActivity.className = "activity-values";
 
   for (let i = 0; i < activityArray.length; i++) {
     const activityOption = document.createElement("option");
 
     activityOption.text = activityArray[i];
     activityOption.value = activityArray[i];
+
+    if (activityOption.text === activityArray[0]) {
+      activityOption.selected = true;
+      activityOption.disabled = true;
+    }
 
     newSelectActivity.appendChild(activityOption);
   }
@@ -92,20 +98,63 @@ function resetTable() {
   if (document.getElementById("co2-result")) {
     document.getElementById("co2-result").remove();
   }
+
+  if (document.getElementById("filter-id")) {
+    document.getElementById("filter-id").remove();
+  }
 }
 
-function updateCO2Emissions(nodeList, length) {
-  let newCO2Str = calculateCO2Emissions(nodeList, length);
-  let divElement = document.getElementById("co2-result");
+function createFilter(nodeList) {
+  const nodeLength = nodeList.length;
+  let newDivElement = document.createElement("div");
+  newDivElement.id = "filter-id";
+  let newDropdownElement = document.createElement("select");
+  newDropdownElement.class = "category-filter";
+  let newOptionElement = document.createElement("option");
+  newOptionElement.class = "category";
+  newOptionElement.innerText = "Filter by <Category>.";
+  newOptionElement.selected = true;
+  newOptionElement.disabled = true;
+  let categoryArray = [];
+
+  newDropdownElement.appendChild(newOptionElement);
+
+  for (let i = 0; i < nodeLength; i++) {
+    const selectedCategory =
+      nodeList[i].options[nodeList[i].selectedIndex].text.trim();
+
+    if (!categoryArray.includes(selectedCategory)) {
+      categoryArray.push(selectedCategory);
+
+      let optionElement = document.createElement("option");
+      optionElement.class = newOptionElement.class;
+      optionElement.innerText = selectedCategory;
+
+      newDropdownElement.appendChild(optionElement);
+    }
+  }
+
+  if (document.getElementById("filter-id")) {
+    document.getElementById("filter-id").remove();
+  }
+
+  newDivElement.appendChild(newDropdownElement);
+  document.getElementById("body-id").appendChild(newDivElement);
+}
+
+function createPieChart() {
+  let newDivElement = document.createElement("div");
+  newDivElement.class = "chart-id";
+} // To be finished
+
+function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
+  let newCO2Str = calculateCO2Emissions(nodeList1, length1, nodeList2, length2);
 
   if (newCO2Str === undefined) {
-    if (!divElement) {
-    } else {
-      divElement.remove();
-    }
+    clearDynamicHTMLElements();
   } else {
-    if (divElement) {
-      divElement.remove();
+    if (document.getElementById("co2-result")) {
+      clearDynamicHTMLElements();
     }
 
     let element = document.createElement("p");
@@ -119,10 +168,74 @@ function updateCO2Emissions(nodeList, length) {
 
     div.appendChild(element);
     document.getElementById("body-id").appendChild(div);
+
+    createFilter(nodeList2);
   }
 }
 
-function calculateCO2Emissions(nodeList, length) {
+function checkActivityOptionValues(activityNodeList, length) {
+  const activityArray = [
+    "Sitting/Sleeping",
+    "Walking/Running",
+    "Eating solid foods and drinking fluids",
+    "Charging portable gadgets (e.g., smartphone, laptop, tablet)",
+    "Buying clothing and cosmetic products",
+    "Recycling",
+    "Using geyser",
+    "Driving a vehicle",
+    "Taking a taxi (regular, Uber, or Bolt)",
+  ];
+
+  for (let i = 0; i < length; i++) {
+    let activity =
+      activityNodeList[i].options[
+        activityNodeList[i].selectedIndex
+      ].text.trim();
+
+    if (!activityArray.includes(activity)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function checkCategoryOptionValues(categoryNodeList, length) {
+  const categoryArray = [
+    "Transport",
+    "Food & Drinks",
+    "Energy Use",
+    "Consumption & Products",
+    "Waste",
+    "Housing",
+    "Other",
+  ];
+
+  for (let i = 0; i < length; i++) {
+    let category =
+      categoryNodeList[i].options[
+        categoryNodeList[i].selectedIndex
+      ].text.trim();
+
+    if (!categoryArray.includes(category)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function clearDynamicHTMLElements() {
+  if (document.getElementById("co2-result")) {
+    document.getElementById("co2-result").remove();
+  }
+
+  if (document.getElementById("filter-id")) {
+    document.getElementById("filter-id").remove();
+  }
+}
+
+function calculateCO2Emissions(nodeList1, length1, nodeList2, length2) {
   let CO2Total = 0;
 
   const categoryMultiplier = {
@@ -137,23 +250,34 @@ function calculateCO2Emissions(nodeList, length) {
 
   const globalAvgCO2Emissions = 25.9;
 
-  for (let i = 0; i < length; i++) {
-    let category = nodeList[i].options[nodeList[i].selectedIndex].text.trim();
+  if (checkActivityOptionValues(nodeList1, length1) === false) {
+    window.alert("Please select an activity.");
+    return;
+  } else if (checkCategoryOptionValues(nodeList2, length2) === false) {
+    window.alert("Please select a category.");
+    return;
+  } else {
+    for (let i = 0; i < length2; i++) {
+      let category =
+        nodeList2[i].options[nodeList2[i].selectedIndex].text.trim();
 
-    if (!(category in categoryMultiplier)) {
-      window.alert("Please select a category.");
-      return;
+      CO2Total += categoryMultiplier[category] * globalAvgCO2Emissions;
     }
 
-    CO2Total += categoryMultiplier[category] * globalAvgCO2Emissions;
+    return CO2Total.toFixed(2);
   }
-
-  return CO2Total.toFixed(2);
 }
 
 function getTotalCO2Emissions() {
-  const htmlOptionsNodeList = document.querySelectorAll(".category-values");
-  const nodeListLength = htmlOptionsNodeList.length;
+  const htmlOptionsNodeList1 = document.querySelectorAll(".activity-values");
+  const nodeListLength1 = htmlOptionsNodeList1.length;
+  const htmlOptionsNodeList2 = document.querySelectorAll(".category-values");
+  const nodeListLength2 = htmlOptionsNodeList2.length;
 
-  updateCO2Emissions(htmlOptionsNodeList, nodeListLength);
+  updateCO2Emissions(
+    htmlOptionsNodeList1,
+    nodeListLength1,
+    htmlOptionsNodeList2,
+    nodeListLength2
+  );
 }
