@@ -1,29 +1,39 @@
-function addActivityData() {
-  const activityArray = [
-    "Select an activity",
-    "Sitting/Sleeping",
-    "Walking/Running",
-    "Eating solid foods and drinking fluids",
-    "Charging portable gadgets (e.g., smartphone, laptop, tablet)",
-    "Buying clothing and cosmetic products",
-    "Recycling",
-    "Using geyser",
-    "Driving a vehicle",
-    "Taking a taxi (regular, Uber, or Bolt)",
-  ];
+const ACTIVITY_ARRAY = [
+  "Select an activity",
+  "Sitting/Sleeping",
+  "Walking/Running",
+  "Eating solid foods and drinking fluids",
+  "Charging portable gadgets (e.g., smartphone, laptop, tablet)",
+  "Buying clothing and cosmetic products",
+  "Recycling",
+  "Using geyser",
+  "Driving a vehicle",
+  "Taking a taxi (regular, Uber, or Bolt)",
+];
+const CATEGORY_ARRAY = [
+  "Select a category",
+  "Transport",
+  "Food & Drinks",
+  "Energy Use",
+  "Consumption & Products",
+  "Waste",
+  "Housing",
+  "Other",
+];
 
+function addActivityData() {
   const newTableRow = document.createElement("tr");
   const newTableData = document.createElement("td");
   const newSelectActivity = document.createElement("select");
   newSelectActivity.className = "activity-values";
 
-  for (let i = 0; i < activityArray.length; i++) {
+  for (let i = 0; i < ACTIVITY_ARRAY.length; i++) {
     const activityOption = document.createElement("option");
 
-    activityOption.text = activityArray[i];
-    activityOption.value = activityArray[i];
+    activityOption.text = ACTIVITY_ARRAY[i];
+    activityOption.value = ACTIVITY_ARRAY[i];
 
-    if (activityOption.text === activityArray[0]) {
+    if (activityOption.text === ACTIVITY_ARRAY[0]) {
       activityOption.selected = true;
       activityOption.disabled = true;
     }
@@ -38,29 +48,18 @@ function addActivityData() {
 }
 
 function addCategoryData() {
-  const categoryArray = [
-    "Select a category",
-    "Transport",
-    "Food & Drinks",
-    "Energy Use",
-    "Consumption & Products",
-    "Waste",
-    "Housing",
-    "Other",
-  ];
-
   const newTableRow = addActivityData();
   const newTableData = document.createElement("td");
   const newSelectCategory = document.createElement("select");
 
   newSelectCategory.setAttribute("class", "category-values");
 
-  for (let i = 0; i < categoryArray.length; i++) {
+  for (let i = 0; i < CATEGORY_ARRAY.length; i++) {
     const categoryOption = document.createElement("option");
-    categoryOption.text = categoryArray[i];
-    categoryOption.value = categoryArray[i];
+    categoryOption.text = CATEGORY_ARRAY[i];
+    categoryOption.value = CATEGORY_ARRAY[i];
 
-    if (categoryArray[i] === categoryArray[0]) {
+    if (categoryOption.text === CATEGORY_ARRAY[0]) {
       categoryOption.selected = true;
       categoryOption.disabled = true;
     }
@@ -102,9 +101,9 @@ function createFilter(nodeList) {
   let newDivElement = document.createElement("div");
   newDivElement.id = "filter-id";
   let newDropdownElement = document.createElement("select");
-  newDropdownElement.class = "category-filter";
+  newDropdownElement.className = "category-filter";
   let newOptionElement = document.createElement("option");
-  newOptionElement.class = "category";
+  newOptionElement.className = "category";
   newOptionElement.innerText = "Filter by <Category>.";
   newOptionElement.selected = true;
   newOptionElement.disabled = true;
@@ -137,7 +136,7 @@ function createFilter(nodeList) {
 
 function createPieChart() {
   let newDivElement = document.createElement("div");
-  newDivElement.class = "chart-id";
+  newDivElement.id = "chart-id";
 } // To be finished
 
 function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
@@ -167,25 +166,13 @@ function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
 }
 
 function checkActivityOptionValues(activityNodeList, length) {
-  const activityArray = [
-    "Sitting/Sleeping",
-    "Walking/Running",
-    "Eating solid foods and drinking fluids",
-    "Charging portable gadgets (e.g., smartphone, laptop, tablet)",
-    "Buying clothing and cosmetic products",
-    "Recycling",
-    "Using geyser",
-    "Driving a vehicle",
-    "Taking a taxi (regular, Uber, or Bolt)",
-  ];
-
   for (let i = 0; i < length; i++) {
     let activity =
       activityNodeList[i].options[
         activityNodeList[i].selectedIndex
       ].text.trim();
 
-    if (!activityArray.includes(activity)) {
+    if (activity === ACTIVITY_ARRAY[0]) {
       return false;
     }
   }
@@ -194,23 +181,13 @@ function checkActivityOptionValues(activityNodeList, length) {
 }
 
 function checkCategoryOptionValues(categoryNodeList, length) {
-  const categoryArray = [
-    "Transport",
-    "Food & Drinks",
-    "Energy Use",
-    "Consumption & Products",
-    "Waste",
-    "Housing",
-    "Other",
-  ];
-
   for (let i = 0; i < length; i++) {
     let category =
       categoryNodeList[i].options[
         categoryNodeList[i].selectedIndex
       ].text.trim();
 
-    if (!categoryArray.includes(category)) {
+    if (category === CATEGORY_ARRAY[0]) {
       return false;
     }
   }
