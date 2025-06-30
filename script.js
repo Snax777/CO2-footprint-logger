@@ -94,14 +94,7 @@ function resetTable() {
   }
 
   addTableRow();
-
-  if (document.getElementById("co2-result")) {
-    document.getElementById("co2-result").remove();
-  }
-
-  if (document.getElementById("filter-id")) {
-    document.getElementById("filter-id").remove();
-  }
+  clearDynamicHTMLElements();
 }
 
 function createFilter(nodeList) {
