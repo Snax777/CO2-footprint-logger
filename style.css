@@ -1,6 +1,5 @@
 html {
     font-size: 20px;
-
 }
 
 body {
@@ -76,4 +75,14 @@ select {
 #task-div {
     margin-bottom: 50px;
     margin-top: -40px;
+}
+
+#chart-id {
+    display: flex;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+svg {
+    background-color: rgba(0, 0, 0, 0);
 }

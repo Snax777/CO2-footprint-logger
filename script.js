@@ -20,6 +20,17 @@ const CATEGORY_ARRAY = [
   "Housing",
   "Other",
 ];
+const CATEGORY_MULTIPLIER = {
+  Transport: 2,
+  "Food & Drinks": 0.25,
+  "Energy Use": 1.5,
+  "Consumption & Products": 0.01,
+  Waste: 0.5,
+  Housing: 0.75,
+  Other: 1,
+};
+const GLOBAL_AVG_CO2_EMISSIONS = 25.9;
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 function addActivityData() {
   const newTableRow = document.createElement("tr");
@@ -96,31 +107,113 @@ function resetTable() {
   clearDynamicHTMLElements();
 }
 
-function createFilter(nodeList) {
-  const nodeLength = nodeList.length;
+function getTableData(nodeList) {
+  let dataArray = [];
+  let dataSummaryArray = [];
+
+  for (let i = 0; i < nodeList.length; i++) {
+    let data = {};
+    const category = nodeList[i].options[nodeList[i].selectedIndex].text.trim();
+    data[category] = CATEGORY_MULTIPLIER[category] * GLOBAL_AVG_CO2_EMISSIONS;
+
+    dataArray.push(data);
+  }
+
+  CATEGORY_ARRAY.forEach((category) => {
+    let total = dataArray.reduce((sum, obj) => {
+      return sum + (obj[category] ?? 0);
+    }, 0);
+
+    if (total > 0) {
+      let data = {};
+      data[category] = total;
+
+      dataSummaryArray.push(data);
+    }
+  });
+
+  return dataSummaryArray;
+}
+
+function updateTableData(
+  nodeList1,
+  nodeListLength1,
+  nodeList2,
+  nodeListLength2
+) {
+  const pi = Math.PI;
+  const cx = "250";
+  const cy = "250";
+  let radius = "75";
+  const strokeWidth = (parseInt(radius) * 2).toString();
+  const circumference = parseFloat((2 * parseInt(radius) * pi).toFixed(2));
+  const colorsArray = [
+    "aqua",
+    "crimson",
+    "slategray",
+    "darkorange",
+    "royalblue",
+    "gold",
+  ];
+
+  let tableData = getTableData(nodeList2);
+  const CO2Total = calculateCO2Emissions(
+    nodeList1,
+    nodeListLength1,
+    nodeList2,
+    nodeListLength2
+  );
+
+  let lastStop = 0;
+
+  for (let i = 0; i < tableData.length; i++) {
+    const CO2Key = Object.keys(tableData[i])[0];
+    const CO2Value = tableData[i][CO2Key];
+    const gapLength = (CO2Value / CO2Total) * circumference;
+    const remainingLength =
+      circumference - gapLength;
+
+    tableData[i]["cx"] = cx;
+    tableData[i]["cy"] = cy;
+    tableData[i]["r"] = radius;
+    tableData[i]["fill"] = "transparent";
+    tableData[i]["stroke"] = colorsArray[i];
+    tableData[i]["stroke-linecap"] = "butt"
+    tableData[i]["stroke-width"] = strokeWidth;
+    tableData[i]["stroke-dasharray"] = `${gapLength} ${remainingLength}`;
+    tableData[i]["stroke-dashoffset"] = `${lastStop}`;
+
+    lastStop -= gapLength;
+  }
+
+  return tableData;
+}
+
+function createFilter(nodeList1, nodeList2) {
+  const nodeLength = nodeList2.length;
   let newDivElement = document.createElement("div");
   newDivElement.id = "filter-id";
   let newDropdownElement = document.createElement("select");
-  newDropdownElement.className = "category-filter";
+  newDropdownElement.id = "category-filter-id";
   let newOptionElement = document.createElement("option");
-  newOptionElement.className = "category";
-  newOptionElement.innerText = "Filter by <Category>.";
-  newOptionElement.selected = true;
-  newOptionElement.disabled = true;
+  newOptionElement.className = "category-filter";
+  newOptionElement.innerText = "Filter by <Category>";
+  newOptionElement.value = "all";
   let categoryArray = [];
 
   newDropdownElement.appendChild(newOptionElement);
 
   for (let i = 0; i < nodeLength; i++) {
     const selectedCategory =
-      nodeList[i].options[nodeList[i].selectedIndex].text.trim();
+      nodeList2[i].options[nodeList2[i].selectedIndex].text.trim();
 
     if (!categoryArray.includes(selectedCategory)) {
       categoryArray.push(selectedCategory);
 
       let optionElement = document.createElement("option");
-      optionElement.class = newOptionElement.class;
+      optionElement.className = newOptionElement.className;
       optionElement.innerText = selectedCategory;
+      optionElement.value = selectedCategory;
 
       newDropdownElement.appendChild(optionElement);
     }
@@ -132,17 +225,79 @@ function createFilter(nodeList) {
 
   newDivElement.appendChild(newDropdownElement);
   document.getElementById("body-id").appendChild(newDivElement);
+
+  document.getElementById("category-filter-id").onchange = () =>
+    createPieChart(nodeList1, nodeList2);
 }
 
-function createPieChart() {
+function createPieChart(nodeList1, nodeList2) {
+  if (document.getElementById("chart-id")) {
+    document.getElementById("chart-id").remove();
+  }
+
   let newDivElement = document.createElement("div");
   newDivElement.id = "chart-id";
-} // To be finished
+
+  let newSVGCanvasElement = document.createElementNS(SVG_NAMESPACE, "svg");
+  newSVGCanvasElement.setAttribute("width", "80vw");
+  newSVGCanvasElement.setAttribute("height", "75vh");
+  newSVGCanvasElement.setAttribute("viewBox", "0 0 500 500");
+  newSVGCanvasElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+  const defaultColor = "gainsboro";
+
+  let updatedTableData = updateTableData(
+    nodeList1,
+    nodeList1.length,
+    nodeList2,
+    nodeList2.length
+  );
+  const categoryFilterElement = document.getElementById("category-filter-id");
+  const filter = categoryFilterElement?.value || "all";
+
+  for (let i = 0; i < updatedTableData.length; i++) {
+    const newCircleElement = document.createElementNS(SVG_NAMESPACE, "circle");
+    const CO2Key = Object.keys(updatedTableData[i])[0];
+    const color = updatedTableData[i]["stroke"];
+
+    newCircleElement.setAttribute("cx", updatedTableData[i]["cx"]);
+    newCircleElement.setAttribute("cy", updatedTableData[i]["cy"]);
+    newCircleElement.setAttribute("r", updatedTableData[i]["r"]);
+    newCircleElement.setAttribute("fill", updatedTableData[i]["fill"]);
+    newCircleElement.setAttribute("stroke", updatedTableData[i]["stroke"]);
+    newCircleElement.setAttribute("stroke-linecap", updatedTableData[i]["stroke-linecap"]);
+    newCircleElement.setAttribute(
+      "stroke-width",
+      updatedTableData[i]["stroke-width"]
+    );
+    newCircleElement.setAttribute(
+      "stroke-dasharray",
+      updatedTableData[i]["stroke-dasharray"]
+    );
+    newCircleElement.setAttribute(
+      "stroke-dashoffset",
+      updatedTableData[i]["stroke-dashoffset"]
+    );
+
+    newCircleElement.setAttribute("data-category", CO2Key);
+
+    if (filter === "all" || filter === CO2Key) {
+      newCircleElement.setAttribute("stroke", color);
+    } else {
+      newCircleElement.setAttribute("stroke", defaultColor);
+    }
+
+    newSVGCanvasElement.appendChild(newCircleElement);
+  }
+
+  newDivElement.appendChild(newSVGCanvasElement);
+  document.body.appendChild(newDivElement);
+}
 
 function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
-  let newCO2Str = calculateCO2Emissions(nodeList1, length1, nodeList2, length2);
+  let CO2Value = calculateCO2Emissions(nodeList1, length1, nodeList2, length2);
 
-  if (newCO2Str === undefined) {
+  if (CO2Value === undefined) {
     clearDynamicHTMLElements();
   } else {
     if (document.getElementById("co2-result")) {
@@ -153,15 +308,13 @@ function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
     element.id = "co2-value";
     let div = document.createElement("div");
     div.id = "co2-result";
-    element.innerHTML =
-      "The total CO<sub>2</sub> emissions is " +
-      newCO2Str +
-      " kg CO<sub>2</sub>.";
+    element.innerHTML = `The total CO<sub>2</sub> emissions is ${CO2Value}  kg CO<sub>2</sub>.`;
 
     div.appendChild(element);
     document.getElementById("body-id").appendChild(div);
 
-    createFilter(nodeList2);
+    createFilter(nodeList1, nodeList2);
+    createPieChart(nodeList1, nodeList2);
   }
 }
 
@@ -203,22 +356,15 @@ function clearDynamicHTMLElements() {
   if (document.getElementById("filter-id")) {
     document.getElementById("filter-id").remove();
   }
+
+  if (document.getElementById("chart-id")) {
+    document.getElementById("chart-id").remove();
+  }
 }
 
 function calculateCO2Emissions(nodeList1, length1, nodeList2, length2) {
   let CO2Total = 0;
-
-  const categoryMultiplier = {
-    Transport: 2,
-    "Food & Drinks": 0.25,
-    "Energy Use": 1.5,
-    "Consumption & Products": 0.01,
-    Waste: 0.5,
-    Housing: 0.75,
-    Other: 1,
-  };
-
-  const globalAvgCO2Emissions = 25.9;
+  const tableDataSummary = getTableData(nodeList2);
 
   if (checkActivityOptionValues(nodeList1, length1) === false) {
     window.alert("Please select an activity.");
@@ -227,15 +373,16 @@ function calculateCO2Emissions(nodeList1, length1, nodeList2, length2) {
     window.alert("Please select a category.");
     return;
   } else {
-    for (let i = 0; i < length2; i++) {
-      let category =
-        nodeList2[i].options[nodeList2[i].selectedIndex].text.trim();
-
-      CO2Total += categoryMultiplier[category] * globalAvgCO2Emissions;
+    for (let i = 0; i < tableDataSummary.length; i++) {
+      for (const category of CATEGORY_ARRAY) {
+        if (tableDataSummary[i][category] != undefined) {
+          CO2Total += tableDataSummary[i][category];
+        }
+      }
     }
-
-    return CO2Total.toFixed(2);
   }
+
+  return Math.round(CO2Total * 100) / 100;
 }
 
 function getTotalCO2Emissions() {
