@@ -84,5 +84,20 @@ select {
 }
 
 svg {
-    background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 20px;
+}
+
+#legend-table {
+    border-color: black;
+    border-style: solid;
+    border-collapse: collapse;
+    border-width: 2px;
+}
+
+#legend-table > tr > td {
+    text-align: center;
+    color: white;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-weight: bold;
 }

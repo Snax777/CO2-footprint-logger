@@ -89,7 +89,9 @@ function addTableRow() {
 }
 
 function removeTableRow() {
-  var tableRowLength = document.querySelectorAll("tr").length;
+  var tableRowLength = document
+    .getElementById("table")
+    .querySelectorAll("tr").length;
 
   if (tableRowLength > 2) {
     document.querySelectorAll("tr")[tableRowLength - 1].remove();
@@ -97,10 +99,12 @@ function removeTableRow() {
 }
 
 function resetTable() {
-  const tableLength = document.querySelectorAll("tr").length;
+  const tableLength = document
+    .getElementById("table")
+    .querySelectorAll("tr").length;
 
   for (let i = 1; i < tableLength; i++) {
-    document.querySelectorAll("tr")[1].remove();
+    document.getElementById("table").querySelectorAll("tr")[1].remove();
   }
 
   addTableRow();
@@ -146,7 +150,7 @@ function updateTableData(
   const cy = "250";
   let radius = "75";
   const strokeWidth = (parseInt(radius) * 2).toString();
-  const circumference = parseFloat((2 * parseInt(radius) * pi).toFixed(2));
+  const circumference = 2 * parseInt(radius) * pi;
   const colorsArray = [
     "aqua",
     "crimson",
@@ -169,19 +173,20 @@ function updateTableData(
   for (let i = 0; i < tableData.length; i++) {
     const CO2Key = Object.keys(tableData[i])[0];
     const CO2Value = tableData[i][CO2Key];
-    const gapLength = (CO2Value / CO2Total) * circumference;
-    const remainingLength =
-      circumference - gapLength;
+    const gapLength = Math.round((CO2Value / CO2Total) * circumference);
+    const remainingLength = Math.round(circumference - gapLength);
+    const percentage = ((CO2Value / CO2Total) * 100).toFixed(2);
 
     tableData[i]["cx"] = cx;
     tableData[i]["cy"] = cy;
     tableData[i]["r"] = radius;
     tableData[i]["fill"] = "transparent";
     tableData[i]["stroke"] = colorsArray[i];
-    tableData[i]["stroke-linecap"] = "butt"
+    tableData[i]["stroke-linecap"] = "butt";
     tableData[i]["stroke-width"] = strokeWidth;
     tableData[i]["stroke-dasharray"] = `${gapLength} ${remainingLength}`;
     tableData[i]["stroke-dashoffset"] = `${lastStop}`;
+    tableData[i]["percentage"] = percentage + "%";
 
     lastStop -= gapLength;
   }
@@ -265,7 +270,10 @@ function createPieChart(nodeList1, nodeList2) {
     newCircleElement.setAttribute("r", updatedTableData[i]["r"]);
     newCircleElement.setAttribute("fill", updatedTableData[i]["fill"]);
     newCircleElement.setAttribute("stroke", updatedTableData[i]["stroke"]);
-    newCircleElement.setAttribute("stroke-linecap", updatedTableData[i]["stroke-linecap"]);
+    newCircleElement.setAttribute(
+      "stroke-linecap",
+      updatedTableData[i]["stroke-linecap"]
+    );
     newCircleElement.setAttribute(
       "stroke-width",
       updatedTableData[i]["stroke-width"]
@@ -294,6 +302,64 @@ function createPieChart(nodeList1, nodeList2) {
   document.body.appendChild(newDivElement);
 }
 
+function createLegendTable(nodeList1, nodeList2) {
+  if (document.getElementById("legend-id")) {
+    document.getElementById("legend-id").remove();
+  }
+
+  const updatedTableData = updateTableData(
+    nodeList1,
+    nodeList1.length,
+    nodeList2,
+    nodeList2.length
+  );
+  const legendDiv = document.createElement("div");
+  legendDiv.id = "legend-id";
+  const legendTable = document.createElement("table");
+  legendTable.id = "legend-table";
+
+  const headerRow1 = document.createElement("tr");
+  const header1 = document.createElement("th");
+  header1.setAttribute("colspan", "3");
+  header1.innerHTML = "CO<sub>2</sub> Data Legend";
+
+  headerRow1.appendChild(header1);
+  legendTable.appendChild(headerRow1);
+
+  const columnNames = ["Category", "Colour", "CO<sub>2</sub> Emissions %"];
+
+  const headerRow2 = document.createElement("tr");
+
+  for (const column of columnNames) {
+    const header2 = document.createElement("th");
+    header2.innerHTML = column;
+
+    headerRow2.appendChild(header2);
+    legendTable.appendChild(headerRow2);
+  }
+
+  for (const data of updatedTableData) {
+    let dataArray = [Object.keys(data)[0], data["stroke"], data["percentage"]];
+    let dataRow = document.createElement("tr");
+
+    for (let i = 0; i < 3; i++) {
+      const tableData = document.createElement("td");
+      tableData.innerHTML = dataArray[i];
+
+      if (i === 1) {
+        tableData.style.backgroundColor = dataArray[i];
+      }
+
+      dataRow.appendChild(tableData);
+    }
+
+    legendTable.appendChild(dataRow);
+  }
+
+  legendDiv.appendChild(legendTable);
+  document.body.appendChild(legendDiv);
+}
+
 function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
   let CO2Value = calculateCO2Emissions(nodeList1, length1, nodeList2, length2);
 
@@ -308,12 +374,16 @@ function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
     element.id = "co2-value";
     let div = document.createElement("div");
     div.id = "co2-result";
-    element.innerHTML = `The total CO<sub>2</sub> emissions is ${CO2Value}  kg CO<sub>2</sub>.`;
+    element.innerHTML =
+      "The total CO<sub>2</sub> emissions is " +
+      CO2Value.toFixed(2) +
+      " kg CO<sub>2</sub>.";
 
     div.appendChild(element);
     document.getElementById("body-id").appendChild(div);
 
     createFilter(nodeList1, nodeList2);
+    createLegendTable(nodeList1, nodeList2);
     createPieChart(nodeList1, nodeList2);
   }
 }
@@ -360,17 +430,23 @@ function clearDynamicHTMLElements() {
   if (document.getElementById("chart-id")) {
     document.getElementById("chart-id").remove();
   }
+
+  if (document.getElementById("legend-id")) {
+    document.getElementById("legend-id").remove();
+  }
 }
 
 function calculateCO2Emissions(nodeList1, length1, nodeList2, length2) {
   let CO2Total = 0;
   const tableDataSummary = getTableData(nodeList2);
 
-  if (checkActivityOptionValues(nodeList1, length1) === false) {
+  if (!checkActivityOptionValues(nodeList1, length1)) {
     window.alert("Please select an activity.");
+    clearDynamicHTMLElements();
     return;
-  } else if (checkCategoryOptionValues(nodeList2, length2) === false) {
+  } else if (!checkCategoryOptionValues(nodeList2, length2)) {
     window.alert("Please select a category.");
+    clearDynamicHTMLElements();
     return;
   } else {
     for (let i = 0; i < tableDataSummary.length; i++) {
@@ -380,9 +456,9 @@ function calculateCO2Emissions(nodeList1, length1, nodeList2, length2) {
         }
       }
     }
-  }
 
-  return Math.round(CO2Total * 100) / 100;
+    return CO2Total;
+  }
 }
 
 function getTotalCO2Emissions() {
@@ -398,3 +474,53 @@ function getTotalCO2Emissions() {
     nodeListLength2
   );
 }
+
+window.addEventListener("beforeunload", () => {
+  const rows = document.querySelectorAll("#table tr");
+  const tableState = [];
+
+  rows.forEach((row) => {
+    const activitySelect = row.querySelector(".activity-values");
+    const categorySelect = row.querySelector(".category-values");
+
+    if (activitySelect && categorySelect) {
+      tableState.push({
+        activity: activitySelect.value,
+        category: categorySelect.value,
+      });
+    }
+  });
+
+  localStorage.setItem("tableState", JSON.stringify(tableState));
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  const savedTableState = JSON.parse(localStorage.getItem("tableState"));
+
+  if (savedTableState && savedTableState.length > 0) {
+    const table = document.getElementById("table");
+
+    while (table.rows.length > 1) {
+      table.deleteRow(1);
+    }
+
+    savedTableState.forEach((rowData) => {
+      const newRow = addCategoryData();
+
+      const activitySelect = newRow.querySelector(".activity-values");
+      const categorySelect = newRow.querySelector(".category-values");
+
+      if (activitySelect) {
+        activitySelect.value = rowData.activity;
+      }
+
+      if (categorySelect) {
+        categorySelect.value = rowData.category;
+      }
+
+      table.appendChild(newRow);
+    });
+  } else {
+    addTableRow();
+  }
+});
