@@ -520,7 +520,5 @@ window.addEventListener("DOMContentLoaded", () => {
 
       table.appendChild(newRow);
     });
-  } else {
-    addTableRow();
   }
 });
