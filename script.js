@@ -352,7 +352,7 @@ function updateCO2Emissions(nodeList, categoryFilter) {
 
       div.id = "no-data-result";
       element.innerHTML =
-        "There is no data on the selected category filter: '" +
+        "There is no data based on the selected category filter: '" +
         categoryFilter +
         "'.";
 
