@@ -27,7 +27,11 @@ const ACTIVITY_CATEGORY_DATA = [
     multiplier: 0.3,
   },
   { activity: "Recycling", category: "Waste", multiplier: 0.15 },
-  { activity: "Using geyser", category: "Energy Use", multiplier: 0.8 },
+  {
+    activity: "Using geyser",
+    category: "Housing & Energy Use",
+    multiplier: 0.8,
+  },
   { activity: "Driving a car", category: "Transport", multiplier: 3 },
   { activity: "Riding a motorcycle", category: "Transport", multiplier: 1.75 },
   {
@@ -41,14 +45,53 @@ const ACTIVITY_CATEGORY_DATA = [
     category: "Transport",
     multiplier: 2,
   },
-  { activity: "Watching TV", category: "Energy Use", multiplier: 1.5 },
-  { activity: "Using refrigerator", category: "Energy Use", multiplier: 2.25 },
+  {
+    activity: "Watching TV",
+    category: "Housing & Energy Use",
+    multiplier: 1.5,
+  },
+  {
+    activity: "Using refrigerator",
+    category: "Housing & Energy Use",
+    multiplier: 2.25,
+  },
   {
     activity: "Making tea/coffee",
     category: "Food & Drinks",
     multiplier: 0.75,
   },
   { activity: "Making a braai", category: "Food & Drinks", multiplier: 1.25 },
+  {
+    activity: "Heating home",
+    category: "Housing & Energy Use",
+    multiplier: 2.5,
+  },
+  {
+    activity: "Cooling/AC use",
+    category: "Housing & Energy Use",
+    multiplier: 3.0,
+  },
+  {
+    activity: "Water heating",
+    category: "Housing & Energy Use",
+    multiplier: 1.8,
+  },
+  {
+    activity: "Lighting home",
+    category: "Housing & Energy Use",
+    multiplier: 0.6,
+  },
+  {
+    activity: "Hoovering carpet",
+    category: "Housing & Energy Use",
+    multiplier: 1.4,
+  },
+  {
+    activity: "Washing dishes",
+    category: "Housing & Energy Use",
+    multiplier: 1.1,
+  },
+  { activity: "Cooking", category: "Housing & Energy Use", multiplier: .9 },
 ];
 const GLOBAL_AVG_CO2_EMISSIONS = 25.9;
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
@@ -113,28 +156,30 @@ function resetTable() {
 }
 
 function getTableData(nodeList, categoryFilter) {
-  let dataArray = [];
+  const activityMap = {};
 
   for (let i = 0; i < nodeList.length; i++) {
-    const activity = nodeList[i].value;
+    const selectedActivity = nodeList[i].value;
 
-    for (let data of ACTIVITY_CATEGORY_DATA) {
-      if (activity === data.activity) {
-        let dataCopy = Object.assign({}, data);
-        dataCopy.CO2Value = dataCopy.multiplier * GLOBAL_AVG_CO2_EMISSIONS;
+    const data = ACTIVITY_CATEGORY_DATA.find(
+      (obj) => obj.activity === selectedActivity
+    );
 
-        if (
-          categoryFilter === dataCopy["category"] ||
-          categoryFilter === "all"
-        ) {
-          dataArray.push(dataCopy);
-          break;
-        }
+    if (categoryFilter === "all" || data.category === categoryFilter) {
+      const CO2Value = data.multiplier * GLOBAL_AVG_CO2_EMISSIONS;
+
+      if (activityMap[selectedActivity]) {
+        activityMap[selectedActivity].CO2Value += CO2Value;
+      } else {
+        activityMap[selectedActivity] = {
+          ...data,
+          CO2Value: CO2Value,
+        };
       }
     }
   }
 
-  return dataArray;
+  return Object.values(activityMap);
 }
 
 function updateTableData(nodeList, categoryFilter) {
@@ -163,6 +208,13 @@ function updateTableData(nodeList, categoryFilter) {
     "indigo",
     "darkmagenta",
     "darkslateblue",
+    "darkcyan",
+    "firebrick",
+    "teal",
+    "darkgoldenrod",
+    "mediumvioletred",
+    "violet",
+    "silver"
   ];
 
   let tableData = getTableData(nodeList, categoryFilter);
@@ -267,7 +319,7 @@ function createLegendTable(objectDataArray, categoryFilter) {
     "Activity",
     "Category",
     "Colour",
-    "CO<sub>2</sub> Emissions %",
+    "CO<sub>2</sub> Emissions (%)",
   ];
 
   if (categoryFilter != "all") {
@@ -307,6 +359,8 @@ function createLegendTable(objectDataArray, categoryFilter) {
         tableData.style.backgroundColor = dataArray[i];
       } else if (i === 2 && dataArray.length === 4) {
         tableData.style.backgroundColor = dataArray[i];
+      } else {
+        tableData.style.backgroundColor = "gray";
       }
 
       dataRow.appendChild(tableData);
