@@ -22,7 +22,7 @@
         </div>
 
         <div>
-            <button id="add-btn" onclick="addTableRow()">Add</button>
+            <button id="add-btn" onclick="addNewTableRow()">Add</button>
             <button id="remove-btn" onclick="removeTableRow()">Remove</button>
             <button id="reset-btn" onclick="resetTable()">Reset</button>
         </div>
@@ -31,41 +31,50 @@
             <table id="table">
                 <tr>
                     <th>Activity</th>
-                    <th>Category</th>
                 </tr>
                 <tr id="data">
                     <td>
                         <select class="activity-values">
                             <option value="Select an activity" disabled selected>Select an activity</option>
-                            <option value="Sitting/Sleeping">Sitting/Sleeping</option>
-                            <option value="Walking/Running">Walking/Running</option>
-                            <option value="Eating solid foods and drinking fluids">
-                                Eating solid foods and drinking fluids
-                            </option>
+                            <option value="Sitting/Sleeping">Sitting/Sleeping</option> 1
+                            <option value="Walking/Running">Walking/Running</option> 2
+                            <option value="Eating beef">
+                                Eating beef
+                            </option> 3
+                            <option value="Eating hot chips">Eating hot chips</option> 4
                             <option value="Charging portable gadgets (e.g., smartphone, laptop, tablet)">
                                 Charging portable gadgets (e.g., smartphone, laptop, tablet)
-                            </option>
-                            <option value="Buying clothing and cosmetic products">Buying clothing and cosmetic products</option>
-                            <option value="Recycling">Recycling</option>
-                            <option value="Using-geyser">Using geyser</option>
-                            <option value="Driving-a-vehicle">Driving a vehicle</option>
-                            <option value="Taking-a-taxi">Taking a taxi (regular, Uber, or Bolt)</option>
-                        </select>
-                    </td>
-                    <td>
-                        <select class="category-values">
-                            <option value="Select a category" class="category-value" disabled selected>Select a category</option>
-                            <option value="Transport" class="category-value">Transport</option>
-                            <option value="Food & Drinks" class="category-value">Food & Drinks</option>
-                            <option value="Energy Use" class="category-value">Energy Use</option>
-                            <option value="Consumption & Products" id="category-value">Consumption & Products</option>
-                            <option value="Waste" class="category-value">Waste</option>
-                            <option value="Housing" class="category-value">Housing</option>
-                            <option value="Other" class="category-value">Other</option>
+                            </option> 5
+                            <option value="Buying clothes">Buying clothes</option> 6
+                            <option value="Using cosmetic products">Using cosmetic products</option> 7
+                            <option value="Recycling">Recycling</option> 8
+                            <option value="Using geyser">Using geyser</option> 9
+                            <option value="Driving a car">Driving a car</option> 10
+                            <option value="Riding a motorcycle">Riding a motorcycle</option> 11
+                            <option value="Riding a bicycle">Riding a bicycle</option> 12
+                            <option value="Exercising">Exercising</option> 13
+                            <option value="Taking a taxi (regular, Uber, or Bolt)">Taking a taxi (regular, Uber, or Bolt)</option> 14
+                            <option value="Watching TV">Watching TV</option> 15
+                            <option value="Using refrigerator">Using refrigerator</option> 16
+                            <option value="Making tea/coffee">Making tea/coffee</option> 17
+                            <option value="Making a braai">Making a braai</option> 18
                         </select>
                     </td>
                 </tr>
             </table>
+        </div>
+
+        <div>
+            <select class="category-values" id="category-filter">
+                <option value="all">Filter by (Category)</option>
+                <option value="Transport">Transport</option>
+                <option value="Food & Drinks">Food & Drinks</option>
+                <option value="Energy Use">Energy Use</option>
+                <option value="Consumption & Products">Consumption & Products</option>
+                <option value="Waste">Waste</option>
+                <option value="Housing">Housing</option>
+                <option value="Physical Activities">Physical Activities</option>
+            </select>
         </div>
         
         <div>

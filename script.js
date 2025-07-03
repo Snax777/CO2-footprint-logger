@@ -1,101 +1,97 @@
-const ACTIVITY_ARRAY = [
-  "Select an activity",
-  "Sitting/Sleeping",
-  "Walking/Running",
-  "Eating solid foods and drinking fluids",
-  "Charging portable gadgets (e.g., smartphone, laptop, tablet)",
-  "Buying clothing and cosmetic products",
-  "Recycling",
-  "Using geyser",
-  "Driving a vehicle",
-  "Taking a taxi (regular, Uber, or Bolt)",
+const ACTIVITY_CATEGORY_DATA = [
+  {
+    activity: "Sitting/Sleeping",
+    category: "Physical Activities",
+    multiplier: 0.03,
+  },
+  {
+    activity: "Walking/Running",
+    category: "Physical Activities",
+    multiplier: 0.5,
+  },
+  { activity: "Eating beef", category: "Food & Drinks", multiplier: 0.1 },
+  { activity: "Eating hot chips", category: "Food & Drinks", multiplier: 0.05 },
+  {
+    activity: "Charging portable gadgets (e.g., smartphone, laptop, tablet)",
+    category: "Energy Use",
+    multiplier: 1.5,
+  },
+  {
+    activity: "Buying clothes",
+    category: "Consumption & Products",
+    multiplier: 0.01,
+  },
+  {
+    activity: "Using cosmetic products",
+    category: "Consumption & Products",
+    multiplier: 0.3,
+  },
+  { activity: "Recycling", category: "Waste", multiplier: 0.15 },
+  { activity: "Using geyser", category: "Energy Use", multiplier: 0.8 },
+  { activity: "Driving a car", category: "Transport", multiplier: 3 },
+  { activity: "Riding a motorcycle", category: "Transport", multiplier: 1.75 },
+  {
+    activity: "Riding a bicycle",
+    category: "Physical Activities",
+    multiplier: 1.25,
+  },
+  { activity: "Exercising", category: "Physical Activities", multiplier: 1 },
+  {
+    activity: "Taking a taxi (regular, Uber, or Bolt)",
+    category: "Transport",
+    multiplier: 2,
+  },
+  { activity: "Watching TV", category: "Energy Use", multiplier: 1.5 },
+  { activity: "Using refrigerator", category: "Energy Use", multiplier: 2.25 },
+  {
+    activity: "Making tea/coffee",
+    category: "Food & Drinks",
+    multiplier: 0.75,
+  },
+  { activity: "Making a braai", category: "Food & Drinks", multiplier: 1.25 },
 ];
-const CATEGORY_ARRAY = [
-  "Select a category",
-  "Transport",
-  "Food & Drinks",
-  "Energy Use",
-  "Consumption & Products",
-  "Waste",
-  "Housing",
-  "Other",
-];
-const CATEGORY_MULTIPLIER = {
-  Transport: 2,
-  "Food & Drinks": 0.25,
-  "Energy Use": 1.5,
-  "Consumption & Products": 0.01,
-  Waste: 0.5,
-  Housing: 0.75,
-  Other: 1,
-};
 const GLOBAL_AVG_CO2_EMISSIONS = 25.9;
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
-function addActivityData() {
+function addNewTableRow() {
   const newTableRow = document.createElement("tr");
   const newTableData = document.createElement("td");
   const newSelectActivity = document.createElement("select");
   newSelectActivity.className = "activity-values";
 
-  for (let i = 0; i < ACTIVITY_ARRAY.length; i++) {
+  const defaultActivityOption = document.createElement("option");
+  defaultActivityOption.text = "Select an activity";
+  defaultActivityOption.value = "all";
+  defaultActivityOption.selected = true;
+  defaultActivityOption.disabled = true;
+
+  newSelectActivity.appendChild(defaultActivityOption);
+
+  for (let i = 0; i < ACTIVITY_CATEGORY_DATA.length; i++) {
     const activityOption = document.createElement("option");
 
-    activityOption.text = ACTIVITY_ARRAY[i];
-    activityOption.value = ACTIVITY_ARRAY[i];
-
-    if (activityOption.text === ACTIVITY_ARRAY[0]) {
-      activityOption.selected = true;
-      activityOption.disabled = true;
-    }
+    activityOption.text = ACTIVITY_CATEGORY_DATA[i]["activity"];
+    activityOption.value = ACTIVITY_CATEGORY_DATA[i]["activity"];
 
     newSelectActivity.appendChild(activityOption);
   }
 
   newTableData.appendChild(newSelectActivity);
   newTableRow.appendChild(newTableData);
-
-  return newTableRow;
-}
-
-function addCategoryData() {
-  const newTableRow = addActivityData();
-  const newTableData = document.createElement("td");
-  const newSelectCategory = document.createElement("select");
-
-  newSelectCategory.setAttribute("class", "category-values");
-
-  for (let i = 0; i < CATEGORY_ARRAY.length; i++) {
-    const categoryOption = document.createElement("option");
-    categoryOption.text = CATEGORY_ARRAY[i];
-    categoryOption.value = CATEGORY_ARRAY[i];
-
-    if (categoryOption.text === CATEGORY_ARRAY[0]) {
-      categoryOption.selected = true;
-      categoryOption.disabled = true;
-    }
-
-    newSelectCategory.appendChild(categoryOption);
-  }
-
-  newTableData.appendChild(newSelectCategory);
-  newTableRow.appendChild(newTableData);
-
-  return newTableRow;
-}
-
-function addTableRow() {
-  document.getElementById("table").appendChild(addCategoryData());
+  document.getElementById("table").appendChild(newTableRow);
+  saveToLocalStorage();
 }
 
 function removeTableRow() {
-  var tableRowLength = document
+  let tableRowLength = document
     .getElementById("table")
     .querySelectorAll("tr").length;
 
   if (tableRowLength > 2) {
     document.querySelectorAll("tr")[tableRowLength - 1].remove();
   }
+
+  saveToLocalStorage();
 }
 
 function resetTable() {
@@ -107,44 +103,41 @@ function resetTable() {
     document.getElementById("table").querySelectorAll("tr")[1].remove();
   }
 
-  addTableRow();
+  addNewTableRow();
+  document.getElementById("category-filter").value = "all";
   clearDynamicHTMLElements();
+
+  localStorage.removeItem("footprintData");
+
+  saveToLocalStorage();
 }
 
-function getTableData(nodeList) {
+function getTableData(nodeList, categoryFilter) {
   let dataArray = [];
-  let dataSummaryArray = [];
 
   for (let i = 0; i < nodeList.length; i++) {
-    let data = {};
-    const category = nodeList[i].options[nodeList[i].selectedIndex].text.trim();
-    data[category] = CATEGORY_MULTIPLIER[category] * GLOBAL_AVG_CO2_EMISSIONS;
+    const activity = nodeList[i].value;
 
-    dataArray.push(data);
+    for (let data of ACTIVITY_CATEGORY_DATA) {
+      if (activity === data.activity) {
+        let dataCopy = Object.assign({}, data);
+        dataCopy.CO2Value = dataCopy.multiplier * GLOBAL_AVG_CO2_EMISSIONS;
+
+        if (
+          categoryFilter === dataCopy["category"] ||
+          categoryFilter === "all"
+        ) {
+          dataArray.push(dataCopy);
+          break;
+        }
+      }
+    }
   }
 
-  CATEGORY_ARRAY.forEach((category) => {
-    let total = dataArray.reduce((sum, obj) => {
-      return sum + (obj[category] ?? 0);
-    }, 0);
-
-    if (total > 0) {
-      let data = {};
-      data[category] = total;
-
-      dataSummaryArray.push(data);
-    }
-  });
-
-  return dataSummaryArray;
+  return dataArray;
 }
 
-function updateTableData(
-  nodeList1,
-  nodeListLength1,
-  nodeList2,
-  nodeListLength2
-) {
+function updateTableData(nodeList, categoryFilter) {
   const pi = Math.PI;
   const cx = "250";
   const cy = "250";
@@ -158,21 +151,27 @@ function updateTableData(
     "darkorange",
     "royalblue",
     "gold",
+    "black",
+    "midnightblue",
+    "navy",
+    "darkslategray",
+    "maroon",
+    "darkgreen",
+    "darkolivegreen",
+    "darkred",
+    "saddlebrown",
+    "indigo",
+    "darkmagenta",
+    "darkslateblue",
   ];
 
-  let tableData = getTableData(nodeList2);
-  const CO2Total = calculateCO2Emissions(
-    nodeList1,
-    nodeListLength1,
-    nodeList2,
-    nodeListLength2
-  );
+  let tableData = getTableData(nodeList, categoryFilter);
+  const CO2Total = calculateCO2Emissions(nodeList, categoryFilter);
 
   let lastStop = 0;
 
   for (let i = 0; i < tableData.length; i++) {
-    const CO2Key = Object.keys(tableData[i])[0];
-    const CO2Value = tableData[i][CO2Key];
+    const CO2Value = tableData[i]["CO2Value"];
     const gapLength = Math.round((CO2Value / CO2Total) * circumference);
     const remainingLength = Math.round(circumference - gapLength);
     const percentage = ((CO2Value / CO2Total) * 100).toFixed(2);
@@ -194,54 +193,13 @@ function updateTableData(
   return tableData;
 }
 
-function createFilter(nodeList1, nodeList2) {
-  const nodeLength = nodeList2.length;
-  let newDivElement = document.createElement("div");
-  newDivElement.id = "filter-id";
-  let newDropdownElement = document.createElement("select");
-  newDropdownElement.id = "category-filter-id";
-  let newOptionElement = document.createElement("option");
-  newOptionElement.className = "category-filter";
-  newOptionElement.innerText = "Filter by <Category>";
-  newOptionElement.value = "all";
-  let categoryArray = [];
-
-  newDropdownElement.appendChild(newOptionElement);
-
-  for (let i = 0; i < nodeLength; i++) {
-    const selectedCategory =
-      nodeList2[i].options[nodeList2[i].selectedIndex].text.trim();
-
-    if (!categoryArray.includes(selectedCategory)) {
-      categoryArray.push(selectedCategory);
-
-      let optionElement = document.createElement("option");
-      optionElement.className = newOptionElement.className;
-      optionElement.innerText = selectedCategory;
-      optionElement.value = selectedCategory;
-
-      newDropdownElement.appendChild(optionElement);
-    }
-  }
-
-  if (document.getElementById("filter-id")) {
-    document.getElementById("filter-id").remove();
-  }
-
-  newDivElement.appendChild(newDropdownElement);
-  document.getElementById("body-id").appendChild(newDivElement);
-
-  document.getElementById("category-filter-id").onchange = () =>
-    createPieChart(nodeList1, nodeList2);
-}
-
-function createPieChart(nodeList1, nodeList2) {
-  if (document.getElementById("chart-id")) {
-    document.getElementById("chart-id").remove();
+function createPieChart(nodeList, categoryFilter) {
+  if (document.getElementById("pie-chart")) {
+    document.getElementById("pie-chart").remove();
   }
 
   let newDivElement = document.createElement("div");
-  newDivElement.id = "chart-id";
+  newDivElement.id = "pie-chart";
 
   let newSVGCanvasElement = document.createElementNS(SVG_NAMESPACE, "svg");
   newSVGCanvasElement.setAttribute("width", "80vw");
@@ -249,21 +207,10 @@ function createPieChart(nodeList1, nodeList2) {
   newSVGCanvasElement.setAttribute("viewBox", "0 0 500 500");
   newSVGCanvasElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-  const defaultColor = "gainsboro";
-
-  let updatedTableData = updateTableData(
-    nodeList1,
-    nodeList1.length,
-    nodeList2,
-    nodeList2.length
-  );
-  const categoryFilterElement = document.getElementById("category-filter-id");
-  const filter = categoryFilterElement?.value || "all";
+  let updatedTableData = updateTableData(nodeList, categoryFilter);
 
   for (let i = 0; i < updatedTableData.length; i++) {
     const newCircleElement = document.createElementNS(SVG_NAMESPACE, "circle");
-    const CO2Key = Object.keys(updatedTableData[i])[0];
-    const color = updatedTableData[i]["stroke"];
 
     newCircleElement.setAttribute("cx", updatedTableData[i]["cx"]);
     newCircleElement.setAttribute("cy", updatedTableData[i]["cy"]);
@@ -287,32 +234,22 @@ function createPieChart(nodeList1, nodeList2) {
       updatedTableData[i]["stroke-dashoffset"]
     );
 
-    newCircleElement.setAttribute("data-category", CO2Key);
-
-    if (filter === "all" || filter === CO2Key) {
-      newCircleElement.setAttribute("stroke", color);
-    } else {
-      newCircleElement.setAttribute("stroke", defaultColor);
-    }
-
     newSVGCanvasElement.appendChild(newCircleElement);
   }
 
   newDivElement.appendChild(newSVGCanvasElement);
   document.body.appendChild(newDivElement);
+
+  if (document.getElementById("pie-chart")) {
+    createLegendTable(updatedTableData, categoryFilter);
+  }
 }
 
-function createLegendTable(nodeList1, nodeList2) {
+function createLegendTable(objectDataArray, categoryFilter) {
   if (document.getElementById("legend-id")) {
     document.getElementById("legend-id").remove();
   }
 
-  const updatedTableData = updateTableData(
-    nodeList1,
-    nodeList1.length,
-    nodeList2,
-    nodeList2.length
-  );
   const legendDiv = document.createElement("div");
   legendDiv.id = "legend-id";
   const legendTable = document.createElement("table");
@@ -320,13 +257,23 @@ function createLegendTable(nodeList1, nodeList2) {
 
   const headerRow1 = document.createElement("tr");
   const header1 = document.createElement("th");
-  header1.setAttribute("colspan", "3");
+  header1.setAttribute("colspan", "4");
   header1.innerHTML = "CO<sub>2</sub> Data Legend";
 
   headerRow1.appendChild(header1);
   legendTable.appendChild(headerRow1);
 
-  const columnNames = ["Category", "Colour", "CO<sub>2</sub> Emissions %"];
+  let columnNames = [
+    "Activity",
+    "Category",
+    "Colour",
+    "CO<sub>2</sub> Emissions %",
+  ];
+
+  if (categoryFilter != "all") {
+    header1.setAttribute("colspan", "3");
+    columnNames = columnNames.filter((item) => item !== "Category");
+  }
 
   const headerRow2 = document.createElement("tr");
 
@@ -338,15 +285,27 @@ function createLegendTable(nodeList1, nodeList2) {
     legendTable.appendChild(headerRow2);
   }
 
-  for (const data of updatedTableData) {
-    let dataArray = [Object.keys(data)[0], data["stroke"], data["percentage"]];
+  for (let data of objectDataArray) {
+    let dataArray = [
+      data["activity"],
+      data["category"],
+      data["stroke"],
+      data["percentage"],
+    ];
+
+    if (columnNames.length === 3) {
+      dataArray.splice(1, 1);
+    }
+
     let dataRow = document.createElement("tr");
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < dataArray.length; i++) {
       const tableData = document.createElement("td");
       tableData.innerHTML = dataArray[i];
 
-      if (i === 1) {
+      if (i === 1 && dataArray.length === 3) {
+        tableData.style.backgroundColor = dataArray[i];
+      } else if (i === 2 && dataArray.length === 4) {
         tableData.style.backgroundColor = dataArray[i];
       }
 
@@ -360,57 +319,57 @@ function createLegendTable(nodeList1, nodeList2) {
   document.body.appendChild(legendDiv);
 }
 
-function updateCO2Emissions(nodeList1, length1, nodeList2, length2) {
-  let CO2Value = calculateCO2Emissions(nodeList1, length1, nodeList2, length2);
+function updateCO2Emissions(nodeList, categoryFilter) {
+  let CO2Value = calculateCO2Emissions(nodeList, categoryFilter);
 
   if (CO2Value === undefined) {
     clearDynamicHTMLElements();
   } else {
-    if (document.getElementById("co2-result")) {
+    if (
+      document.getElementById("co2-result") ||
+      document.getElementById("no-data-result")
+    ) {
       clearDynamicHTMLElements();
     }
 
     let element = document.createElement("p");
     element.id = "co2-value";
     let div = document.createElement("div");
-    div.id = "co2-result";
-    element.innerHTML =
-      "The total CO<sub>2</sub> emissions is " +
-      CO2Value.toFixed(2) +
-      " kg CO<sub>2</sub>.";
 
-    div.appendChild(element);
-    document.getElementById("body-id").appendChild(div);
+    if (CO2Value) {
+      div.id = "co2-result";
+      element.innerHTML =
+        "The total CO<sub>2</sub> emissions is " +
+        CO2Value.toFixed(2) +
+        " kg CO<sub>2</sub>.";
 
-    createFilter(nodeList1, nodeList2);
-    createLegendTable(nodeList1, nodeList2);
-    createPieChart(nodeList1, nodeList2);
+      div.appendChild(element);
+      document.getElementById("body-id").appendChild(div);
+
+      createPieChart(nodeList, categoryFilter);
+    } else {
+      clearDynamicHTMLElements();
+
+      div.id = "no-data-result";
+      element.innerHTML =
+        "There is no data on the selected category filter: '" +
+        categoryFilter +
+        "'.";
+
+      div.appendChild(element);
+      document.getElementById("body-id").appendChild(div);
+    }
   }
 }
 
-function checkActivityOptionValues(activityNodeList, length) {
-  for (let i = 0; i < length; i++) {
+function checkActivityOptionValues(activityNodeList) {
+  for (let i = 0; i < activityNodeList.length; i++) {
     let activity =
       activityNodeList[i].options[
         activityNodeList[i].selectedIndex
       ].text.trim();
 
-    if (activity === ACTIVITY_ARRAY[0]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function checkCategoryOptionValues(categoryNodeList, length) {
-  for (let i = 0; i < length; i++) {
-    let category =
-      categoryNodeList[i].options[
-        categoryNodeList[i].selectedIndex
-      ].text.trim();
-
-    if (category === CATEGORY_ARRAY[0]) {
+    if (activity === "Select an activity") {
       return false;
     }
   }
@@ -423,12 +382,16 @@ function clearDynamicHTMLElements() {
     document.getElementById("co2-result").remove();
   }
 
+  if (document.getElementById("no-data-result")) {
+    document.getElementById("no-data-result").remove();
+  }
+
   if (document.getElementById("filter-id")) {
     document.getElementById("filter-id").remove();
   }
 
-  if (document.getElementById("chart-id")) {
-    document.getElementById("chart-id").remove();
+  if (document.getElementById("pie-chart")) {
+    document.getElementById("pie-chart").remove();
   }
 
   if (document.getElementById("legend-id")) {
@@ -436,89 +399,71 @@ function clearDynamicHTMLElements() {
   }
 }
 
-function calculateCO2Emissions(nodeList1, length1, nodeList2, length2) {
+function calculateCO2Emissions(nodeList, categoryFilter) {
   let CO2Total = 0;
-  const tableDataSummary = getTableData(nodeList2);
+  let tableData = getTableData(nodeList, categoryFilter);
 
-  if (!checkActivityOptionValues(nodeList1, length1)) {
+  if (!checkActivityOptionValues(nodeList)) {
     window.alert("Please select an activity.");
     clearDynamicHTMLElements();
     return;
-  } else if (!checkCategoryOptionValues(nodeList2, length2)) {
-    window.alert("Please select a category.");
-    clearDynamicHTMLElements();
-    return;
   } else {
-    for (let i = 0; i < tableDataSummary.length; i++) {
-      for (const category of CATEGORY_ARRAY) {
-        if (tableDataSummary[i][category] != undefined) {
-          CO2Total += tableDataSummary[i][category];
-        }
-      }
+    for (let data of tableData) {
+      CO2Total += data.CO2Value;
     }
-
-    return CO2Total;
   }
+
+  return CO2Total;
 }
 
 function getTotalCO2Emissions() {
-  const htmlOptionsNodeList1 = document.querySelectorAll(".activity-values");
-  const nodeListLength1 = htmlOptionsNodeList1.length;
-  const htmlOptionsNodeList2 = document.querySelectorAll(".category-values");
-  const nodeListLength2 = htmlOptionsNodeList2.length;
+  const allSelectedActivitiesNodeList =
+    document.querySelectorAll(".activity-values");
+  const category = document.getElementById("category-filter").value;
 
-  updateCO2Emissions(
-    htmlOptionsNodeList1,
-    nodeListLength1,
-    htmlOptionsNodeList2,
-    nodeListLength2
-  );
+  updateCO2Emissions(allSelectedActivitiesNodeList, category);
+  saveToLocalStorage();
 }
 
-window.addEventListener("beforeunload", () => {
-  const rows = document.querySelectorAll("#table tr");
-  const tableState = [];
+function loadFromLocalStorage() {
+  const savedData = JSON.parse(localStorage.getItem("footprintData"));
 
-  rows.forEach((row) => {
-    const activitySelect = row.querySelector(".activity-values");
-    const categorySelect = row.querySelector(".category-values");
+  if (!savedData) return;
 
-    if (activitySelect && categorySelect) {
-      tableState.push({
-        activity: activitySelect.value,
-        category: categorySelect.value,
-      });
-    }
-  });
+  const { activities, category } = savedData;
 
-  localStorage.setItem("tableState", JSON.stringify(tableState));
-});
-
-window.addEventListener("DOMContentLoaded", () => {
-  const savedTableState = JSON.parse(localStorage.getItem("tableState"));
-
-  if (savedTableState && savedTableState.length > 0) {
-    const table = document.getElementById("table");
-
-    while (table.rows.length > 1) {
-      table.deleteRow(1);
-    }
-
-    savedTableState.forEach((rowData) => {
-      const newRow = addCategoryData();
-
-      const activitySelect = newRow.querySelector(".activity-values");
-      const categorySelect = newRow.querySelector(".category-values");
-
-      if (activitySelect) {
-        activitySelect.value = rowData.activity;
-      }
-
-      if (categorySelect) {
-        categorySelect.value = rowData.category;
-      }
-
-      table.appendChild(newRow);
-    });
+  const table = document.getElementById("table");
+  while (table.rows.length > 1) {
+    table.deleteRow(1);
   }
-});
+
+  for (let i = 0; i < activities.length; i++) {
+    addNewTableRow();
+  }
+
+  const activityDropdowns = document.querySelectorAll(".activity-values");
+  for (let i = 0; i < activities.length; i++) {
+    activityDropdowns[i].value = activities[i];
+  }
+
+  document.getElementById("category-filter").value = category;
+}
+
+function saveToLocalStorage() {
+  const activityDropdowns = document.querySelectorAll(".activity-values");
+  const selectedActivities = Array.from(activityDropdowns).map(
+    (dropdown) => dropdown.value
+  );
+  const selectedCategory = document.getElementById("category-filter").value;
+
+  const dataToSave = {
+    activities: selectedActivities,
+    category: selectedCategory,
+  };
+
+  localStorage.setItem("footprintData", JSON.stringify(dataToSave));
+}
+
+window.onload = () => {
+  loadFromLocalStorage();
+};
