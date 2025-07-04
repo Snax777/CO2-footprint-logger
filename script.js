@@ -439,10 +439,6 @@ function clearDynamicHTMLElements() {
     document.getElementById("no-data-result").remove();
   }
 
-  if (document.getElementById("filter-id")) {
-    document.getElementById("filter-id").remove();
-  }
-
   if (document.getElementById("pie-chart")) {
     document.getElementById("pie-chart").remove();
   }
