@@ -91,7 +91,7 @@ const ACTIVITY_CATEGORY_DATA = [
     category: "Housing & Energy Use",
     multiplier: 1.1,
   },
-  { activity: "Cooking", category: "Housing & Energy Use", multiplier: .9 },
+  { activity: "Cooking", category: "Housing & Energy Use", multiplier: 0.9 },
 ];
 const GLOBAL_AVG_CO2_EMISSIONS = 25.9;
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
@@ -104,7 +104,7 @@ function addNewTableRow() {
 
   const defaultActivityOption = document.createElement("option");
   defaultActivityOption.text = "Select an activity";
-  defaultActivityOption.value = "all";
+  defaultActivityOption.value = "Select an activity";
   defaultActivityOption.selected = true;
   defaultActivityOption.disabled = true;
 
@@ -214,7 +214,7 @@ function updateTableData(nodeList, categoryFilter) {
     "darkgoldenrod",
     "mediumvioletred",
     "violet",
-    "silver"
+    "silver",
   ];
 
   let tableData = getTableData(nodeList, categoryFilter);
@@ -376,6 +376,8 @@ function createLegendTable(objectDataArray, categoryFilter) {
 function updateCO2Emissions(nodeList, categoryFilter) {
   let CO2Value = calculateCO2Emissions(nodeList, categoryFilter);
 
+  console.log("CO2 from updateCO2Emissions", CO2Value);
+
   if (CO2Value === undefined) {
     clearDynamicHTMLElements();
   } else {
@@ -418,17 +420,14 @@ function updateCO2Emissions(nodeList, categoryFilter) {
 
 function checkActivityOptionValues(activityNodeList) {
   for (let i = 0; i < activityNodeList.length; i++) {
-    let activity =
-      activityNodeList[i].options[
-        activityNodeList[i].selectedIndex
-      ].text.trim();
+    let activity = activityNodeList[i].value;
 
     if (activity === "Select an activity") {
-      return false;
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 function clearDynamicHTMLElements() {
@@ -454,20 +453,20 @@ function clearDynamicHTMLElements() {
 }
 
 function calculateCO2Emissions(nodeList, categoryFilter) {
-  let CO2Total = 0;
-  let tableData = getTableData(nodeList, categoryFilter);
-
-  if (!checkActivityOptionValues(nodeList)) {
+  if (checkActivityOptionValues(nodeList)) {
     window.alert("Please select an activity.");
     clearDynamicHTMLElements();
     return;
   } else {
+    let CO2Total = 0;
+    let tableData = getTableData(nodeList, categoryFilter);
+
     for (let data of tableData) {
       CO2Total += data.CO2Value;
     }
-  }
 
-  return CO2Total;
+    return CO2Total;
+  }
 }
 
 function getTotalCO2Emissions() {
