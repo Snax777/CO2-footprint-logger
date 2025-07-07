@@ -13,7 +13,7 @@ const ACTIVITY_CATEGORY_DATA = [
   { activity: "Eating hot chips", category: "Food & Drinks", multiplier: 0.05 },
   {
     activity: "Charging portable gadgets (e.g., smartphone, laptop, tablet)",
-    category: "Energy Use",
+    category: "Housing & Energy Use",
     multiplier: 1.5,
   },
   {
@@ -190,7 +190,7 @@ function updateTableData(nodeList, categoryFilter) {
   const strokeWidth = (parseInt(radius) * 2).toString();
   const circumference = 2 * parseInt(radius) * pi;
   const colorsArray = [
-    "aqua",
+    "darkorchid",
     "crimson",
     "slategray",
     "darkorange",
@@ -375,8 +375,6 @@ function createLegendTable(objectDataArray, categoryFilter) {
 
 function updateCO2Emissions(nodeList, categoryFilter) {
   let CO2Value = calculateCO2Emissions(nodeList, categoryFilter);
-
-  console.log("CO2 from updateCO2Emissions", CO2Value);
 
   if (CO2Value === undefined) {
     clearDynamicHTMLElements();
